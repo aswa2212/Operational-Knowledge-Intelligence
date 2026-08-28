@@ -1,0 +1,56 @@
+meta:
+  process: refund_handling
+  version: 2
+  generated_at: '2026-08-28T08:03:41.400924+00:00'
+  rule_count: 3
+  flagged_conflict_count: 0
+  schema_version: '1.0'
+rules:
+- id: 99
+  trigger_text: customer_tier == 'VIP' and days_since_purchase <= 45
+  action: approve_refund
+  conditions: {}
+  exceptions: []
+  temporal_scope: permanent
+  status: active
+  score: 0.95
+  provenance:
+    source_id: 69
+- id: 97
+  trigger_text: days_since_purchase <= 30
+  action: approve_refund
+  conditions: {}
+  exceptions: []
+  temporal_scope: permanent
+  status: active
+  score: 0.9
+  provenance:
+    source_id: 67
+- id: 98
+  trigger_text: days_since_purchase > 30 and customer_tier == 'standard'
+  action: deny_refund
+  conditions: {}
+  exceptions: []
+  temporal_scope: permanent
+  status: active
+  score: 0.9
+  provenance:
+    source_id: 68
+flagged_conflicts: []
+escalation_rules:
+- id: ESC-001
+  trigger: no_rule_matches
+  action: escalate_to_human
+  target_role: Manager
+  reason: No matching rule found
+- id: ESC-002
+  trigger: confidence_below_threshold
+  action: escalate_to_human
+  target_role: Manager
+  reason: Confidence below 0.55
+  threshold: 0.55
+- id: ESC-003
+  trigger: conflicting_rules_active
+  action: escalate_to_human
+  target_role: Director
+  reason: Conflicting rules require human arbitration

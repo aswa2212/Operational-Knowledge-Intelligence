@@ -1,0 +1,111 @@
+meta:
+  process: refund_handling
+  version: 9
+  generated_at: '2026-08-28T09:15:49.690403+00:00'
+  rule_count: 5
+  flagged_conflict_count: 2
+  schema_version: '1.0'
+rules:
+- id: 130
+  trigger_text: refund_amount < 100
+  action: approve_refund
+  conditions: {}
+  exceptions: []
+  temporal_scope: permanent
+  status: active
+  score: 0.99
+  provenance:
+    source_id: 99
+- id: 131
+  trigger_text: refund_amount >= 100 and refund_amount <= 500
+  action: require_tier2_team_lead_review
+  conditions: {}
+  exceptions: []
+  temporal_scope: permanent
+  status: active
+  score: 0.98
+  provenance:
+    source_id: 100
+- id: 132
+  trigger_text: refund_amount > 500
+  action: require_manager_and_finance_signoff
+  conditions: {}
+  exceptions: []
+  temporal_scope: permanent
+  status: active
+  score: 0.98
+  provenance:
+    source_id: 101
+- id: 128
+  trigger_text: customer_tier == 'VIP' and days_since_purchase <= 45
+  action: approve_refund
+  conditions: {}
+  exceptions: []
+  temporal_scope: permanent
+  status: active
+  score: 0.95
+  provenance:
+    source_id: 69
+- id: 126
+  trigger_text: days_since_purchase <= 30
+  action: allow_full_refund
+  conditions: {}
+  exceptions: []
+  temporal_scope: permanent
+  status: active
+  score: 0.85
+  provenance:
+    resolution_method: weighted
+    margin: 0.0
+    breakdown:
+      recency: 0.7266131672921213
+      authority: 1.0
+      corroboration: 1.0
+      override: 0.0
+    competing_count: 9
+flagged_conflicts:
+- id: 127
+  trigger_text: days_since_purchase > 30 and customer_tier == 'standard'
+  action: deny_refund
+  provenance:
+    competing:
+    - 68
+    - 73
+    - 76
+    - 79
+    - 82
+    - 85
+    - 95
+    - 103
+    margin: 0.0
+- id: 129
+  trigger_text: item_type == 'digital' and download_completed == true
+  action: deny_refund
+  provenance:
+    competing:
+    - 74
+    - 77
+    - 80
+    - 83
+    - 86
+    - 96
+    - 98
+    - 104
+    margin: 0.057499999999999996
+escalation_rules:
+- id: ESC-001
+  trigger: no_rule_matches
+  action: escalate_to_human
+  target_role: Manager
+  reason: No matching rule found
+- id: ESC-002
+  trigger: confidence_below_threshold
+  action: escalate_to_human
+  target_role: Manager
+  reason: Confidence below 0.55
+  threshold: 0.55
+- id: ESC-003
+  trigger: conflicting_rules_active
+  action: escalate_to_human
+  target_role: Director
+  reason: Conflicting rules require human arbitration

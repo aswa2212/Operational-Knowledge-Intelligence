@@ -1,0 +1,147 @@
+[
+  {
+    "case_id": "fx-001",
+    "process": "refund_handling",
+    "description": "Standard refund within window — auto-approve",
+    "case_input": {
+      "days_since_purchase": 20,
+      "customer_tier": "standard",
+      "order_value": 85,
+      "item_category": "electronics",
+      "reason": "dissatisfied"
+    },
+    "expected_decision": "approve",
+    "expected_confidence_min": 0.65,
+    "expected_escalated": false
+  },
+  {
+    "case_id": "fx-002",
+    "process": "refund_handling",
+    "description": "Refund request outside 30-day window — deny",
+    "case_input": {
+      "days_since_purchase": 45,
+      "customer_tier": "standard",
+      "order_value": 120,
+      "item_category": "software",
+      "reason": "changed_mind"
+    },
+    "expected_decision": "deny",
+    "expected_confidence_min": 0.60,
+    "expected_escalated": false
+  },
+  {
+    "case_id": "fx-003",
+    "process": "refund_handling",
+    "description": "High value refund (>$500) — requires approval",
+    "case_input": {
+      "days_since_purchase": 10,
+      "customer_tier": "enterprise",
+      "order_value": 750,
+      "item_category": "hardware",
+      "reason": "product_defect"
+    },
+    "expected_decision": "requires_approval",
+    "expected_confidence_min": 0.55,
+    "expected_escalated": true
+  },
+  {
+    "case_id": "fx-004",
+    "process": "refund_handling",
+    "description": "Small refund well within window — simple approve",
+    "case_input": {
+      "days_since_purchase": 5,
+      "customer_tier": "standard",
+      "order_value": 35,
+      "item_category": "accessories",
+      "reason": "wrong_item"
+    },
+    "expected_decision": "approve",
+    "expected_confidence_min": 0.70,
+    "expected_escalated": false
+  },
+  {
+    "case_id": "fx-005",
+    "process": "refund_handling",
+    "description": "Enterprise customer, large order, documented defect — escalate for dual approval",
+    "case_input": {
+      "days_since_purchase": 50,
+      "customer_tier": "enterprise",
+      "order_value": 1500,
+      "item_category": "hardware",
+      "reason": "product_defect",
+      "defect_documented": true
+    },
+    "expected_decision": "requires_approval",
+    "expected_confidence_min": 0.50,
+    "expected_escalated": true
+  },
+  {
+    "case_id": "fx-006",
+    "process": "incident_triage",
+    "description": "P1 severity incident — DDoS on API gateway",
+    "case_input": {
+      "error_type": "DDoS",
+      "affected_users_count": 5000,
+      "system_component": "api_gateway",
+      "severity_signal": "service_down"
+    },
+    "expected_decision": "escalate",
+    "expected_confidence_min": 0.65,
+    "expected_escalated": true
+  },
+  {
+    "case_id": "fx-007",
+    "process": "incident_triage",
+    "description": "Low severity — single user auth error, no wider impact",
+    "case_input": {
+      "error_type": "auth_failure",
+      "affected_users_count": 1,
+      "system_component": "auth_service",
+      "severity_signal": "isolated"
+    },
+    "expected_decision": "approve",
+    "expected_confidence_min": 0.55,
+    "expected_escalated": false
+  },
+  {
+    "case_id": "fx-008",
+    "process": "pricing_exceptions",
+    "description": "Discount > 20% — requires manager approval",
+    "case_input": {
+      "discount_percent": 25,
+      "deal_size": 10000,
+      "requestor_role": "sales_rep"
+    },
+    "expected_decision": "requires_approval",
+    "expected_confidence_min": 0.60,
+    "expected_escalated": true
+  },
+  {
+    "case_id": "fx-009",
+    "process": "pricing_exceptions",
+    "description": "Small discount within auto-approve threshold",
+    "case_input": {
+      "discount_percent": 8,
+      "deal_size": 5000,
+      "requestor_role": "sales_rep"
+    },
+    "expected_decision": "approve",
+    "expected_confidence_min": 0.65,
+    "expected_escalated": false
+  },
+  {
+    "case_id": "fx-010",
+    "process": "refund_handling",
+    "description": "Ambiguous — right at the 30-day boundary",
+    "case_input": {
+      "days_since_purchase": 30,
+      "customer_tier": "standard",
+      "order_value": 200,
+      "item_category": "software",
+      "reason": "dissatisfied"
+    },
+    "expected_decision": null,
+    "expected_confidence_min": 0.40,
+    "expected_escalated": true
+  }
+]

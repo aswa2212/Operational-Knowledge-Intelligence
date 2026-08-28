@@ -1,0 +1,68 @@
+# config.yaml
+#
+# OPERATIONAL KNOBS ONLY. Thresholds, weights (as tunable numbers), and
+# allowed-tool lists live here because a non-engineer might reasonably
+# adjust them. The LOGIC that USES these numbers — authority inference,
+# risk classification, conflict resolution — lives in
+# backend/app/core/domain/*.py as versioned Python, not here.
+
+llm:
+  provider: groq          # groq | ollama
+  groq_model: llama-3.1-70b-versatile
+  ollama_model: llama3
+
+resolution:
+  # These are the values resolver.py's RESOLUTION_WEIGHTS reads as
+  # defaults; kept here too so they're visible/tunable without a code
+  # change if a non-engineer needs to adjust them for a demo.
+  recency_weight: 0.35
+  authority_weight: 0.40
+  corroboration_weight: 0.15
+  override_bonus_weight: 0.10
+  accept_min_score: 0.70
+  accept_min_margin: 0.05
+
+risk:
+  refund_auto_threshold: 100
+  refund_approval_threshold: 500
+  refund_auto_min_confidence: 0.75
+  pricing_auto_threshold: 15          # % discount
+  severity_high_requires_approval: true
+
+confidence:
+  auto_execute_min: 0.75
+  approval_required_below: 0.55
+  sample_agreement_n_samples: 5
+  # Restrict sample-agreement sampling to only these case types, per
+  # Risk 3 in the master report (never sample on every decision).
+  sample_agreement_trigger_conditions:
+    - fuzzy_match
+    - low_deterministic_confidence
+    - contradiction_sensitive
+
+processes:
+  refund_handling:
+    condition_fields: [days_since_purchase, customer_tier, order_value, item_category]
+  pricing_exceptions:
+    condition_fields: [discount_percent, deal_size]
+  incident_triage:
+    condition_fields: [error_type, affected_users_count, system_component]
+
+tools:
+  allowed:
+    - github_add_label
+    - github_comment
+    - slack_notify
+    - notion_create_page
+    - mock_refund_payment
+    - escalate_to_human
+
+sync:
+  mode: manual   # manual | scheduled (scheduled is a Tier 2+ upgrade)
+
+prompts:
+  extraction_two_pass_version: v1
+  extraction_single_pass_version: v1
+  conflict_detection_version: v1
+  decision_version: v1
+  approval_summary_version: v1

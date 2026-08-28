@@ -1,0 +1,127 @@
+meta:
+  process: refund_handling
+  version: 24
+  generated_at: '2026-08-25T06:02:46.628076+00:00'
+  rule_count: 6
+  flagged_conflict_count: 1
+  schema_version: '1.0'
+rules:
+- id: 438
+  trigger_text: days_since_purchase <= 30
+  action: approve_refund
+  conditions: {}
+  exceptions: []
+  temporal_scope: permanent
+  status: active
+  score: 0.9
+  provenance:
+    source_id: 237
+- id: 439
+  trigger_text: days_since_purchase > 30 and customer_tier == 'standard'
+  action: deny_refund
+  conditions: {}
+  exceptions: []
+  temporal_scope: permanent
+  status: active
+  score: 0.9
+  provenance:
+    source_id: 238
+- id: 434
+  trigger_text: customer_tier == 'VIP'
+  action: approve_refund
+  conditions: {}
+  exceptions: []
+  temporal_scope: permanent
+  status: active
+  score: 0.85
+  provenance:
+    resolution_method: weighted
+    margin: 0.35000000000000003
+    breakdown:
+      recency: 1.0
+      authority: 0.35
+      corroboration: 1.0
+      override: 0.0
+    competing_count: 2
+- id: 435
+  trigger_text: unspecified
+  action: requires_human_decision
+  conditions: {}
+  exceptions: []
+  temporal_scope: unclear
+  status: active
+  score: 0.85
+  provenance:
+    resolution_method: weighted
+    margin: 0.040000000000000036
+    breakdown:
+      recency: 1.0
+      authority: 0.45
+      corroboration: 1.0
+      override: 0.0
+    competing_count: 2
+- id: 437
+  trigger_text: condition not specified
+  action: requires_human_decision
+  conditions: {}
+  exceptions: []
+  temporal_scope: temporary
+  status: active
+  score: 0.35
+  provenance:
+    source_id: 107
+- id: 436
+  trigger_text: ''
+  action: requires_human_decision
+  conditions: {}
+  exceptions: []
+  temporal_scope: unclear
+  status: active
+  score: 0.3
+  provenance:
+    source_id: 106
+flagged_conflicts:
+- id: 433
+  trigger_text: item_type == 'digital' and download_status == 'completed'
+  action: deny_refund
+  provenance:
+    competing:
+    - 15
+    - 18
+    - 22
+    - 48
+    - 50
+    - 63
+    - 67
+    - 69
+    - 70
+    - 125
+    - 127
+    - 130
+    - 149
+    - 155
+    - 157
+    - 161
+    - 163
+    - 173
+    - 176
+    - 179
+    - 182
+    margin: 0.0
+escalation_rules:
+- id: ESC-001
+  trigger: no_rule_matches
+  action: escalate_to_human
+  target_role: Manager
+  reason: No matching rule found
+- id: ESC-002
+  trigger: confidence_below_threshold
+  action: escalate_to_human
+  target_role: Manager
+  reason: Confidence below 0.55
+  threshold: 0.55
+- id: ESC-003
+  trigger: conflicting_rules_active
+  action: escalate_to_human
+  target_role: Director
+  reason: Conflicting rules require human arbitration

@@ -1,0 +1,206 @@
+meta:
+  process: incident_triage
+  version: 20
+  generated_at: '2026-08-25T05:01:36.937884+00:00'
+  rule_count: 6
+  flagged_conflict_count: 5
+  schema_version: '1.0'
+rules:
+- id: 450
+  trigger_text: crash and system_component == 'api_gateway'
+  action: full_escalation
+  conditions: {}
+  exceptions: []
+  temporal_scope: permanent
+  status: active
+  score: 0.96
+  provenance:
+    source_id: 167
+- id: 440
+  trigger_text: when_502_error_spike_detected
+  action: requires_human_decision
+  conditions: {}
+  exceptions: []
+  temporal_scope: temporary
+  status: active
+  score: 0.85
+  provenance:
+    resolution_method: weighted
+    margin: 0.0
+    breakdown:
+      recency: 1.0
+      authority: 0.35
+      corroboration: 1.0
+      override: 0.0
+    competing_count: 2
+- id: 447
+  trigger_text: affected_users <= 100
+  action: do_not_wake_oncall
+  conditions: {}
+  exceptions:
+  - if affected users exceed 100
+  temporal_scope: permanent
+  status: active
+  score: 0.85
+  provenance:
+    resolution_method: weighted
+    margin: 0.0
+    breakdown:
+      recency: 1.0
+      authority: 0.35
+      corroboration: 1.0
+      override: 0.0
+    competing_count: 3
+- id: 448
+  trigger_text: affected_users > 100
+  action: wake_up_oncall
+  conditions: {}
+  exceptions: []
+  temporal_scope: permanent
+  status: active
+  score: 0.85
+  provenance:
+    resolution_method: weighted
+    margin: 0.0
+    breakdown:
+      recency: 1.0
+      authority: 0.35
+      corroboration: 1.0
+      override: 0.0
+    competing_count: 2
+- id: 446
+  trigger_text: condition_not_specified
+  action: requires_human_decision
+  conditions: {}
+  exceptions: []
+  temporal_scope: temporary
+  status: active
+  score: 0.3
+  provenance:
+    source_id: 55
+- id: 449
+  trigger_text: unknown
+  action: requires_human_decision
+  conditions: {}
+  exceptions: []
+  temporal_scope: unclear
+  status: active
+  score: 0.3
+  provenance:
+    source_id: 152
+flagged_conflicts:
+- id: 441
+  trigger_text: auth_service_returns_401_for_test_accounts
+  action: monitor
+  provenance:
+    competing:
+    - 37
+    - 103
+    - 104
+    margin: 0.0
+- id: 442
+  trigger_text: severity == SEV1
+  action: all_hands_response
+  provenance:
+    competing:
+    - 39
+    - 44
+    - 71
+    - 72
+    - 73
+    - 74
+    - 75
+    - 76
+    - 109
+    - 110
+    - 115
+    - 116
+    - 117
+    - 118
+    - 119
+    - 158
+    - 169
+    - 184
+    - 185
+    - 187
+    - 188
+    - 195
+    - 198
+    - 199
+    - 200
+    - 201
+    - 202
+    - 203
+    - 204
+    margin: 0.0
+- id: 443
+  trigger_text: severity == SEV2
+  action: page_oncall_engineer
+  provenance:
+    competing:
+    - 40
+    - 41
+    - 45
+    - 57
+    - 61
+    - 111
+    - 112
+    - 166
+    - 170
+    - 189
+    - 190
+    - 191
+    - 197
+    margin: 0.0
+- id: 444
+  trigger_text: severity == SEV3
+  action: assign_to_owning_team
+  provenance:
+    competing:
+    - 42
+    - 56
+    - 58
+    - 113
+    - 114
+    - 164
+    - 168
+    - 192
+    - 193
+    margin: 0.0
+- id: 445
+  trigger_text: severity == SEV4 (cosmetic, no user impact)
+  action: github_add_label sev4, add_to_backlog
+  provenance:
+    competing:
+    - 43
+    - 59
+    - 60
+    - 97
+    - 99
+    - 100
+    - 101
+    - 145
+    - 146
+    - 165
+    - 174
+    - 175
+    - 194
+    - 196
+    margin: 0.0
+escalation_rules:
+- id: ESC-001
+  trigger: no_rule_matches
+  action: escalate_to_human
+  target_role: Manager
+  reason: No matching rule found
+- id: ESC-002
+  trigger: confidence_below_threshold
+  action: escalate_to_human
+  target_role: Manager
+  reason: Confidence below 0.55
+  threshold: 0.55
+- id: ESC-003
+  trigger: conflicting_rules_active
+  action: escalate_to_human
+  target_role: Director
+  reason: Conflicting rules require human arbitration

@@ -1,0 +1,7 @@
+{
+  "author": "alex.kumar@company.com",
+  "author_role": "Senior SRE",
+  "timestamp": "2026-04-12T14:30:00",
+  "thread_context": "Re: SEV2 Escalation Thresholds Update",
+  "content": "FYI all on-call engineers: for auth_failure errors with under 50 affected users, we should triage them as low priority (SEV4) unless critical services are blocked. No need to wake up on-call unless affected users exceed 100."
+}

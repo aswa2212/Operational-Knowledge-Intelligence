@@ -1,0 +1,47 @@
+meta:
+  process: pricing_exceptions
+  version: 2
+  generated_at: '2026-08-28T08:57:47.098411+00:00'
+  rule_count: 0
+  flagged_conflict_count: 2
+  schema_version: '1.0'
+rules: []
+flagged_conflicts:
+- id: 120
+  trigger_text: discount_percent <= 10
+  action: approve_discount
+  provenance:
+    competing:
+    - 65
+    - 87
+    - 90
+    - 92
+    margin: 0.0
+- id: 121
+  trigger_text: discount_percent > 20
+  action: require_vp_approval
+  provenance:
+    competing:
+    - 66
+    - 88
+    - 89
+    - 91
+    - 93
+    margin: 0.0
+escalation_rules:
+- id: ESC-001
+  trigger: no_rule_matches
+  action: escalate_to_human
+  target_role: Manager
+  reason: No matching rule found
+- id: ESC-002
+  trigger: confidence_below_threshold
+  action: escalate_to_human
+  target_role: Manager
+  reason: Confidence below 0.55
+  threshold: 0.55
+- id: ESC-003
+  trigger: conflicting_rules_active
+  action: escalate_to_human
+  target_role: Director
+  reason: Conflicting rules require human arbitration

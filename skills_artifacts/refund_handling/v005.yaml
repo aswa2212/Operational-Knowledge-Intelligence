@@ -1,0 +1,80 @@
+meta:
+  process: refund_handling
+  version: 5
+  generated_at: '2026-08-28T08:48:45.820850+00:00'
+  rule_count: 3
+  flagged_conflict_count: 1
+  schema_version: '1.0'
+rules:
+- id: 110
+  trigger_text: customer_tier == 'VIP' and days_since_purchase <= 45
+  action: approve_refund
+  conditions: {}
+  exceptions: []
+  temporal_scope: permanent
+  status: active
+  score: 0.95
+  provenance:
+    source_id: 69
+- id: 108
+  trigger_text: days_since_purchase <= 30
+  action: allow_full_refund
+  conditions: {}
+  exceptions: []
+  temporal_scope: permanent
+  status: active
+  score: 0.9
+  provenance:
+    resolution_method: weighted
+    margin: 0.0
+    breakdown:
+      recency: 1.0
+      authority: 1.0
+      corroboration: 1.0
+      override: 0.0
+    competing_count: 4
+- id: 111
+  trigger_text: item_type == 'digital' and download_completed == true
+  action: deny_refund
+  conditions: {}
+  exceptions: []
+  temporal_scope: permanent
+  status: active
+  score: 0.9
+  provenance:
+    resolution_method: weighted
+    margin: 0.0
+    breakdown:
+      recency: 1.0
+      authority: 1.0
+      corroboration: 1.0
+      override: 0.0
+    competing_count: 3
+flagged_conflicts:
+- id: 109
+  trigger_text: days_since_purchase > 30 and customer_tier == 'standard'
+  action: deny_refund
+  provenance:
+    competing:
+    - 68
+    - 73
+    - 76
+    - 79
+    margin: 0.0
+escalation_rules:
+- id: ESC-001
+  trigger: no_rule_matches
+  action: escalate_to_human
+  target_role: Manager
+  reason: No matching rule found
+- id: ESC-002
+  trigger: confidence_below_threshold
+  action: escalate_to_human
+  target_role: Manager
+  reason: Confidence below 0.55
+  threshold: 0.55
+- id: ESC-003
+  trigger: conflicting_rules_active
+  action: escalate_to_human
+  target_role: Director
+  reason: Conflicting rules require human arbitration

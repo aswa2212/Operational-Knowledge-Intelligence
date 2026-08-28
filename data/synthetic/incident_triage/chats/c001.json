@@ -1,0 +1,7 @@
+{
+  "author": "maria.gonzalez@company.com",
+  "author_role": "VP Engineering",
+  "timestamp": "2026-05-18T16:45:00",
+  "thread_context": "#incident-response",
+  "content": "Reminder: Any DDoS attack or major outage with >10,000 affected users or service_down status must immediately trigger a SEV1 incident declaration and page all leads. Do not wait for manual verification."
+}

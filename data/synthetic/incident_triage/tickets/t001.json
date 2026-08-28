@@ -1,0 +1,7 @@
+{
+  "author": "jira-bot",
+  "author_role": "System",
+  "timestamp": "2026-03-10T03:00:00",
+  "content": "INC-4521: Payment service experiencing intermittent 500 errors. 1,200 users affected. Payment gateway timeout. Severity: SEV2. Assigned to payments team.",
+  "thread_context": "INC-4521"
+}
