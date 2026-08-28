@@ -88,6 +88,12 @@ class PgConnectionWrapper:
         wrapper = PgCursorWrapper(cur, self._conn)
         return wrapper.execute(query, params)
 
+    def executescript(self, script_str: str):
+        # Apply PostgreSQL schema script
+        with self._conn.cursor() as cur:
+            cur.execute(script_str)
+        self._conn.commit()
+
     def commit(self):
         self._conn.commit()
 

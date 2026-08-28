@@ -22,9 +22,16 @@ def get_connection(db_path: str = "oki.db") -> sqlite3.Connection:
     return conn
 
 
-def init_db(conn: sqlite3.Connection) -> None:
-    with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
-        conn.executescript(f.read())
+def init_db(conn) -> None:
+    from app.db.connection import _is_postgres
+    if _is_postgres:
+        schema_file = Path(__file__).parent.parent.parent.parent / "db" / "postgres_schema.sql"
+    else:
+        schema_file = SCHEMA_PATH
+
+    if schema_file.exists():
+        with open(schema_file, "r", encoding="utf-8") as f:
+            conn.executescript(f.read())
     conn.commit()
 
 
