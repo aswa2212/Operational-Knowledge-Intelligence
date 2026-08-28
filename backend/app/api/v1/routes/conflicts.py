@@ -36,7 +36,7 @@ def list_conflicts(process: str | None = Query(None), status: str = "conflict_un
     rows = conn.execute(
         f"SELECT rr.*, ap.id as approval_id, ap.status as approval_status "
         f"FROM resolved_rules rr "
-        f"LEFT JOIN approval_requests ap ON ap.requested_action_json LIKE '%\"resolved_rule_id\": ' || rr.id || '%' "
+        f"LEFT JOIN approval_requests ap ON ap.requested_action_json LIKE '%\"resolved_rule_id\": ' || CAST(rr.id AS TEXT) || '%' "
         f"{where} ORDER BY rr.created_at DESC",
         params,
     ).fetchall()
@@ -75,7 +75,7 @@ def resolve_conflict(rule_id: int, body: ResolveRequest):
     )
     conn.execute(
         "UPDATE approval_requests SET status = 'approved', resolved_at = ?, resolved_by = ? "
-        "WHERE requested_action_json LIKE '%\"resolved_rule_id\": ' || ? || '%'",
+        "WHERE requested_action_json LIKE '%\"resolved_rule_id\": ' || CAST(? AS TEXT) || '%'",
         (now, body.resolved_by, rule_id),
     )
     conn.commit()
