@@ -9,8 +9,31 @@ import axios, { type AxiosError } from 'axios'
 
 // ── Axios instance ─────────────────────────────────────────────────────────
 
+function getBaseUrl(): string {
+  const envUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined)
+    || (import.meta.env.VITE_API_URL as string | undefined)
+
+  if (envUrl && envUrl.trim()) {
+    let clean = envUrl.trim().replace(/\/+$/, '')
+    if (clean.endsWith('/v1')) {
+      clean = clean.slice(0, -3)
+    }
+    if (!clean.endsWith('/api')) {
+      clean = `${clean}/api`
+    }
+    return clean
+  }
+
+  // Fallback for local development
+  if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    return 'http://127.0.0.1:8000/api'
+  }
+
+  return '/api'
+}
+
 export const axiosInstance = axios.create({
-  baseURL: (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '/api',
+  baseURL: getBaseUrl(),
   headers: { 'Content-Type': 'application/json' },
   timeout: 60_000, // 60s — LLM extraction can be slow
 })
