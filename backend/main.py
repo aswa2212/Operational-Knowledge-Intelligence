@@ -65,10 +65,18 @@ def create_app() -> FastAPI:
     )
 
     # ── CORS ──────────────────────────────────────────────────────────────
-    frontend_origin = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
+    raw_origins = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173,http://localhost:3000,http://localhost:4173")
+    allowed_origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
+    
+    # Ensure default local development origins are always present
+    for default_origin in ["http://localhost:5173", "http://localhost:3000", "http://localhost:4173", "http://127.0.0.1:5173"]:
+        if default_origin not in allowed_origins:
+            allowed_origins.append(default_origin)
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[frontend_origin, "http://localhost:3000"],
+        allow_origins=allowed_origins,
+        allow_origin_regex=r"https://.*\.vercel\.app|https://.*\.onrender\.com",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
