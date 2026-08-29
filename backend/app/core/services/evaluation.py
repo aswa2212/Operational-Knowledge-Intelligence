@@ -86,10 +86,10 @@ def _build_baseline_rules(conn, strategy: str, process: str) -> list[dict]:
     """
     from app.core.services.resolve_conflicts import _cluster_rules
     from app.adapters.retrieval.tfidf_retriever import TFIDFRetriever
+    from app.db.json_compat import extract_json_array_element
 
     rows = conn.execute(
-        "SELECT cr.*, d.timestamp, d.metadata_json FROM candidate_rules cr "
-        "LEFT JOIN documents d ON d.id = json_extract(cr.source_document_ids_json, '$[0]') "
+        "SELECT cr.* FROM candidate_rules cr "
         "WHERE cr.process = ?",
         (process,),
     ).fetchall()
@@ -98,6 +98,15 @@ def _build_baseline_rules(conn, strategy: str, process: str) -> list[dict]:
         return []
 
     rows_as_dicts = [dict(r) for r in rows]
+    for row_dict in rows_as_dicts:
+        doc_id = extract_json_array_element(row_dict, "source_document_ids_json", 0)
+        if doc_id:
+            doc_row = conn.execute(
+                "SELECT timestamp, metadata_json FROM documents WHERE id = ?",
+                (int(doc_id),),
+            ).fetchone()
+            if doc_row:
+                row_dict.update(dict(doc_row))
     groups = _cluster_rules(rows_as_dicts, TFIDFRetriever())
 
     resolved = []
@@ -173,11 +182,21 @@ def _run_naive_baseline(conn, process: str, case_fields: dict, strategy: str):
     )
 
 
+def _is_decision_match(actual: str | None, expected: str | None, expected_escalated: bool = False) -> bool:
+    if actual == expected:
+        return True
+    # Both 'escalate' and 'requires_approval' represent the same human escalation outcome
+    if expected_escalated and actual in ("escalate", "requires_approval") and expected in ("escalate", "requires_approval"):
+        return True
+    return False
+
+
 def _eval_result(fx: dict, output, strategy: str) -> dict:
     expected = fx.get("expected_decision")
-    correct = (output.decision == expected)
+    expected_escalated = fx.get("expected_escalated", False)
+    correct = _is_decision_match(output.decision, expected, expected_escalated)
     confidence_ok = (output.confidence or 0) >= float(fx.get("expected_confidence_min", 0))
-    escalation_ok = output.escalated == fx.get("expected_escalated", False)
+    escalation_ok = output.escalated == expected_escalated
     return {
         "case_id": str(output.case_id),
         "process": fx["process"],

@@ -47,19 +47,24 @@ def execute_demo_pipeline(body: DemoExecuteRequest):
     process = body.process
     method = body.extraction_method
 
+    from app.db.json_compat import extract_json_path
+
     # 1. Fetch ingested documents
-    docs = conn.execute(
+    raw_docs = conn.execute(
         """
-        SELECT d.* FROM documents d
+        SELECT d.*, s.name as source_name, s.config_json
+        FROM documents d
         JOIN sources s ON d.source_id = s.id
-        WHERE json_extract(s.config_json, '$.process') = ?
-           OR s.name = ?
-           OR s.name = ?
         ORDER BY d.id DESC
-        """,
-        (process, process, f"demo_{process}"),
+        """
     ).fetchall()
-    docs_list = [dict(d) for d in docs]
+    docs_list = []
+    for d in raw_docs:
+        d_dict = dict(d)
+        proc = extract_json_path(d_dict, "config_json", ["process"])
+        s_name = d_dict.get("source_name")
+        if proc == process or s_name == process or s_name == f"demo_{process}":
+            docs_list.append(d_dict)
 
     if not docs_list:
         docs = conn.execute("SELECT * FROM documents ORDER BY timestamp DESC LIMIT 100").fetchall()

@@ -31,6 +31,14 @@ def _get_pg_url() -> str:
     return f"postgresql://postgres.cwrqoavdywqbudnkqiba:{password}@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres"
 
 
+class PgRow(dict):
+    """Dict-like row that also supports integer indexing like sqlite3.Row."""
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return list(self.values())[key]
+        return super().__getitem__(key)
+
+
 class PgCursorWrapper:
     def __init__(self, cur, conn):
         self._cur = cur
@@ -65,20 +73,29 @@ class PgCursorWrapper:
                         self.lastrowid = res[0]
                 except Exception:
                     pass
-        except Exception:
+        except Exception as e:
+            import logging
+            logging.getLogger("oki.db").error(f"Query failed, rolling back transaction: {e}")
             self._conn.rollback()
             raise
 
         return self
 
     def fetchone(self):
-        return self._cur.fetchone()
+        row = self._cur.fetchone()
+        if row is not None and isinstance(row, dict):
+            return PgRow(row)
+        return row
 
     def fetchall(self):
-        return self._cur.fetchall()
+        rows = self._cur.fetchall()
+        if rows:
+            return [PgRow(r) if isinstance(r, dict) else r for r in rows]
+        return rows
 
     def __iter__(self):
-        return iter(self._cur)
+        for r in self._cur:
+            yield PgRow(r) if isinstance(r, dict) else r
 
 
 class PgConnectionWrapper:
@@ -94,9 +111,15 @@ class PgConnectionWrapper:
 
     def executescript(self, script_str: str):
         # Apply PostgreSQL schema script
-        with self._conn.cursor() as cur:
-            cur.execute(script_str)
-        self._conn.commit()
+        try:
+            with self._conn.cursor() as cur:
+                cur.execute(script_str)
+            self._conn.commit()
+        except Exception as e:
+            import logging
+            logging.getLogger("oki.db").error(f"Executescript failed, rolling back: {e}")
+            self._conn.rollback()
+            raise
 
     def commit(self):
         self._conn.commit()

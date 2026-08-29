@@ -1,0 +1,46 @@
+meta:
+  process: incident_triage
+  version: 3
+  generated_at: '2026-08-29T09:59:10.045497+00:00'
+  rule_count: 2
+  flagged_conflict_count: 0
+  schema_version: '1.0'
+rules:
+- id: 174
+  trigger_text: error_type == 'DDoS' or severity_signal == 'service_down'
+  action: declare_sev1_incident
+  conditions: {}
+  exceptions: []
+  temporal_scope: permanent
+  status: active
+  score: 0.95
+  provenance:
+    source_id: 71
+- id: 173
+  trigger_text: error_type == 'auth_failure' and affected_users < 100
+  action: triage_low_priority_SEV4
+  conditions: {}
+  exceptions: []
+  temporal_scope: permanent
+  status: active
+  score: 0.9
+  provenance:
+    source_id: 70
+flagged_conflicts: []
+escalation_rules:
+- id: ESC-001
+  trigger: no_rule_matches
+  action: escalate_to_human
+  target_role: Manager
+  reason: No matching rule found
+- id: ESC-002
+  trigger: confidence_below_threshold
+  action: escalate_to_human
+  target_role: Manager
+  reason: Confidence below 0.55
+  threshold: 0.55
+- id: ESC-003
+  trigger: conflicting_rules_active
+  action: escalate_to_human
+  target_role: Director
+  reason: Conflicting rules require human arbitration

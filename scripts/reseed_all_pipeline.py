@@ -47,20 +47,19 @@ conn.execute("UPDATE candidate_rules SET process = 'refund_handling' WHERE trigg
 conn.execute("UPDATE candidate_rules SET process = 'pricing_exceptions' WHERE trigger_text LIKE '%discount%' OR trigger_text LIKE '%deal%'")
 conn.commit()
 
-pe_count = conn.execute("SELECT COUNT(*) FROM candidate_rules WHERE process = 'pricing_exceptions'").fetchone()[0]
-if pe_count == 0:
-    conn.execute(
-        "INSERT INTO candidate_rules (process, trigger_text, conditions_json, action, exceptions_json, temporal_scope, authority_score, confidence, raw_quote, source_document_ids_json, extraction_method, status) "
-        "VALUES (?, ?, ?, ?, ?, ?, 0.90, 0.90, ?, '[]', 'two_pass', 'candidate')",
-        ("pricing_exceptions", "discount_percent <= 10", "{}", "approve_discount", "[]", "permanent", "Reps can approve discounts up to 10%")
-    )
-    conn.execute(
-        "INSERT INTO candidate_rules (process, trigger_text, conditions_json, action, exceptions_json, temporal_scope, authority_score, confidence, raw_quote, source_document_ids_json, extraction_method, status) "
-        "VALUES (?, ?, ?, ?, ?, ?, 0.95, 0.95, ?, '[]', 'two_pass', 'candidate')",
-        ("pricing_exceptions", "discount_percent > 20", "{}", "require_vp_approval", "[]", "permanent", "Discounts over 20% require VP approval")
-    )
-    conn.commit()
-    print("  - pricing_exceptions: Added candidate rules from policy")
+conn.execute("DELETE FROM candidate_rules WHERE process = 'pricing_exceptions'")
+conn.execute(
+    "INSERT INTO candidate_rules (process, trigger_text, conditions_json, action, exceptions_json, temporal_scope, authority_score, confidence, raw_quote, source_document_ids_json, extraction_method, status) "
+    "VALUES (?, ?, ?, ?, ?, ?, 0.90, 0.90, ?, '[]', 'two_pass', 'candidate')",
+    ("pricing_exceptions", "discount_percent <= 10", "{}", "approve_discount", "[]", "permanent", "Reps can approve discounts up to 10%")
+)
+conn.execute(
+    "INSERT INTO candidate_rules (process, trigger_text, conditions_json, action, exceptions_json, temporal_scope, authority_score, confidence, raw_quote, source_document_ids_json, extraction_method, status) "
+    "VALUES (?, ?, ?, ?, ?, ?, 0.95, 0.95, ?, '[]', 'two_pass', 'candidate')",
+    ("pricing_exceptions", "discount_percent > 20", "{}", "require_vp_approval", "[]", "permanent", "Discounts over 20% require VP approval")
+)
+conn.commit()
+print("  - pricing_exceptions: Added candidate rules from policy")
 
 # Ensure refund policy has clean candidate rules
 conn.execute("DELETE FROM candidate_rules WHERE process = 'refund_handling' AND trigger_text LIKE '%days_since_purchase%'")

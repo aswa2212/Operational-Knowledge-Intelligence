@@ -23,6 +23,7 @@ from app.adapters.storage.sqlite.repositories import (
     insert_approval_request,
     log_audit_event,
 )
+from app.db.json_compat import extract_json_array_element
 
 SIMILARITY_THRESHOLD = 0.35  # rules with cosine ≥ this are considered "same topic"
 OVERRIDE_PATTERN = re.compile(
@@ -111,11 +112,10 @@ def run_conflict_resolution(conn, process: str) -> dict:
     conn.execute("DELETE FROM resolved_rules WHERE process = ?", (process,))
     conn.commit()
 
-    # Load candidate rules for this process joined with source document data
+    # Load candidate rules for this process
     rows = conn.execute(
-        """SELECT cr.*, d.timestamp, d.author_handle, d.source_type, d.channel_or_space, d.metadata_json
+        """SELECT cr.*
            FROM candidate_rules cr
-           LEFT JOIN documents d ON d.id = json_extract(cr.source_document_ids_json, '$[0]')
            WHERE cr.process = ?""",
         (process,),
     ).fetchall()
@@ -125,6 +125,18 @@ def run_conflict_resolution(conn, process: str) -> dict:
         return {"process": process, "resolved": 0, "flagged": 0, "total_candidates": 0}
 
     rows_as_dicts = [dict(r) for r in rows]
+    
+    # Enrich with document metadata using json_compat helper
+    for row_dict in rows_as_dicts:
+        doc_id = extract_json_array_element(row_dict, 'source_document_ids_json', 0)
+        if doc_id:
+            doc_row = conn.execute(
+                "SELECT timestamp, author_handle, source_type, channel_or_space, metadata_json FROM documents WHERE id = ?",
+                (int(doc_id),)
+            ).fetchone()
+            if doc_row:
+                doc_data = dict(doc_row)
+                row_dict.update(doc_data)
 
     # Group by topic / condition domain
     retriever = TFIDFRetriever()
