@@ -38,8 +38,12 @@ class PgCursorWrapper:
         self.lastrowid = None
 
     def execute(self, query: str, params: tuple | list | None = None):
-        # Convert SQLite ? placeholders to PostgreSQL %s
-        converted_query = re.sub(r'(?<!\?)\?(?!\?)', '%s', query)
+        # Escape any literal % when params are used, then convert SQLite ? placeholders to PostgreSQL %s
+        if params is not None:
+            escaped_query = query.replace('%', '%%')
+            converted_query = re.sub(r'(?<!\?)\?(?!\?)', '%s', escaped_query)
+        else:
+            converted_query = re.sub(r'(?<!\?)\?(?!\?)', '%s', query)
         
         # If INSERT statement without RETURNING, append RETURNING id to capture lastrowid
         is_insert = converted_query.strip().upper().startswith("INSERT INTO")
@@ -49,7 +53,7 @@ class PgCursorWrapper:
             converted_query += " RETURNING id"
 
         try:
-            if params:
+            if params is not None and len(params) > 0:
                 self._cur.execute(converted_query, params)
             else:
                 self._cur.execute(converted_query)

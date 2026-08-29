@@ -5,11 +5,10 @@ import { api } from '../lib/api'
 import {
   Brain, LayoutDashboard, Play, CheckCircle, GitBranch,
   BarChart2, Plug, Settings, FileText, Files, Layers, Zap, ChevronRight,
-  Sparkles, ShoppingBag, ExternalLink,
+  ShoppingBag, ExternalLink,
 } from 'lucide-react'
 
 const PRIMARY_NAV = [
-  { to: '/demo',        icon: Sparkles,        label: 'Demo Showcase' },
   { to: '/',            icon: LayoutDashboard, label: 'Overview'      },
   { to: '/documents',   icon: Files,           label: 'Documents'     },
   { to: '/skills',      icon: Layers,          label: 'Skills'        },
@@ -107,14 +106,14 @@ export default function Layout({ children }: Props) {
           <div className="flex items-center gap-2 flex-shrink-0">
             {/* Mock Client Website Button */}
             <a
-              href="http://localhost:3000"
+              href={import.meta.env.VITE_MOCK_CLIENT_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' ? 'https://oki-mock-client.vercel.app' : 'http://localhost:3000')}
               target="_blank"
               rel="noreferrer"
               className="btn-gold btn-xs gap-1.5 font-display font-semibold hidden md:inline-flex"
               title="Open Standalone Mock Client Website (ShopNow / B2B Quotes / DevOps Incident Desk)"
             >
               <ShoppingBag style={{ width: 12, height: 12 }} />
-              Mock Client (3000)
+              Mock Client
               <ExternalLink style={{ width: 10, height: 10 }} />
             </a>
 

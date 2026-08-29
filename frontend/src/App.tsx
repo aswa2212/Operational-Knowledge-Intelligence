@@ -15,14 +15,13 @@ import Documents from './pages/Documents'
 import Skills from './pages/Skills'
 import Actions from './pages/Actions'
 import Audit from './pages/Audit'
-import DemoShowcase from './pages/DemoShowcase'
 
 export default function App() {
   return (
     <Layout>
       <Routes>
-        {/* Showcase Demo */}
-        <Route path="/demo" element={<DemoShowcase />} />
+        {/* Redirect /demo to Overview */}
+        <Route path="/demo" element={<Navigate to="/" replace />} />
 
         {/* 9 Main Pages */}
         <Route path="/" element={<Overview />} />

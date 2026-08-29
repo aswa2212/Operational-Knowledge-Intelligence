@@ -92,8 +92,9 @@ export default function Overview() {
   const casesToday = cases.filter((c) => new Date(c.created_at).toDateString() === today)
   const autoToday = casesToday.filter((c) => c.decision && !c.decision.escalated).length
   const escalatedToday = casesToday.filter((c) => c.decision?.escalated).length
-  const avgConfidence = cases.length
-    ? Math.round(cases.filter(c => c.decision).reduce((s, c) => s + (c.decision!.confidence ?? 0), 0) / cases.filter(c => c.decision).length * 100)
+  const decidedCases = cases.filter((c) => c.decision && c.decision.confidence != null)
+  const avgConfidence = decidedCases.length
+    ? Math.round((decidedCases.reduce((s, c) => s + (c.decision!.confidence ?? 0), 0) / decidedCases.length) * 100)
     : 0
 
   const recentCases = cases.slice(0, 10)

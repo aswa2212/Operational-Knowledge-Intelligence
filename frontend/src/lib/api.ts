@@ -29,7 +29,8 @@ function getBaseUrl(): string {
     return 'http://127.0.0.1:8000/api'
   }
 
-  return '/api'
+  // Fallback for production (e.g. Vercel) to direct to Render backend
+  return 'https://operational-knowledge-intelligence.onrender.com/api'
 }
 
 export const axiosInstance = axios.create({
