@@ -106,7 +106,7 @@ export default function Layout({ children }: Props) {
           <div className="flex items-center gap-2 flex-shrink-0">
             {/* Mock Client Website Button */}
             <a
-              href={import.meta.env.VITE_MOCK_CLIENT_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' ? 'https://oki-mock-client.vercel.app' : 'http://localhost:3000')}
+              href={import.meta.env.VITE_MOCK_CLIENT_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' ? 'https://oki-mock-website.vercel.app' : 'http://localhost:3000')}
               target="_blank"
               rel="noreferrer"
               className="btn-gold btn-xs gap-1.5 font-display font-semibold hidden md:inline-flex"
