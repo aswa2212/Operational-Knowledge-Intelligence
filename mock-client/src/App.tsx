@@ -6,7 +6,20 @@ import {
   Loader, ShieldCheck, Terminal
 } from 'lucide-react'
 
-const API_BASE = 'http://127.0.0.1:8000/api/v1'
+const getApiBase = () => {
+  const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL
+  if (envUrl) {
+    const trimmed = envUrl.replace(/\/+$/, '')
+    return trimmed.endsWith('/api/v1') ? trimmed : `${trimmed}/api/v1`
+  }
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return 'https://operational-knowledge-intelligence.onrender.com/api/v1'
+  }
+  return 'http://127.0.0.1:8000/api/v1'
+}
+
+const API_BASE = getApiBase()
+const OKI_DASHBOARD_URL = import.meta.env.VITE_OKI_DASHBOARD_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' ? 'https://oki-saas.vercel.app' : 'http://localhost:5173')
 
 interface Order {
   id: string
@@ -150,13 +163,13 @@ export default function App() {
 
           {/* Link to OKI SaaS Dashboard */}
           <a
-            href="http://localhost:5173"
+            href={OKI_DASHBOARD_URL}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-gold-500/15 text-brand-900 border border-gold-500/30 hover:bg-gold-500/25 transition-colors"
           >
             <Sparkles style={{ width: 13, height: 13, color: '#B8860B' }} />
-            Open OKI SaaS Console (5173) <ExternalLink style={{ width: 11, height: 11 }} />
+            Open OKI SaaS Console <ExternalLink style={{ width: 11, height: 11 }} />
           </a>
         </div>
       </header>
@@ -576,9 +589,9 @@ function ResultCard({ result, loading }: { result: any; loading: boolean }) {
       </div>
 
       <div className="pt-3 border-t border-brand-200 flex items-center justify-between text-2xs text-brand-500">
-        <span>Logged into SQLite Audit Trail</span>
-        <a href="http://localhost:5173/actions" target="_blank" rel="noreferrer" className="text-brand-900 font-semibold hover:underline">
-          View Audit Log (5173) ↗
+        <span>Logged into SQLite / PostgreSQL Audit Trail</span>
+        <a href={`${OKI_DASHBOARD_URL}/actions`} target="_blank" rel="noreferrer" className="text-brand-900 font-semibold hover:underline">
+          View Audit Log ↗
         </a>
       </div>
     </div>
